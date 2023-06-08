@@ -1,0 +1,13 @@
+resources:
+- ../base
+- github.com/vectordotdev/vector/distribution/kubernetes/vector-agent
+
+images:
+  - name: timberio/vector
+    newName: timberio/vector
+    newTag: 0.28.0-distroless-libc
+
+namespace: logging
+
+patches:
+- path: configmap.yaml

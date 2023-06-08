@@ -1,0 +1,11 @@
+resources:
+- configmap.yaml
+- service.yaml
+- statefulset.yaml
+
+configMapGenerator:
+- name: log-store-license
+  files:
+  - license.txt
+  options:
+    disableNameSuffixHash: true

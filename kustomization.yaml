@@ -1,0 +1,9 @@
+images:
+- name: logstore/log-store
+  newName: logstore/log-store
+  newTag: v1.0.1
+
+namespace: logging
+
+resources:
+- manifests/base/

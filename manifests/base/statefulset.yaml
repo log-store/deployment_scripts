@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: log-store
+spec:
+  selector:
+    matchLabels:
+      app: log-store
+  serviceName: "log-store"
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: log-store
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: log-store
+        image: logstore/log-store
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8181
+          name: web
+        - containerPort: 1234
+          name: socket
+        - containerPort: 1601
+          name: syslog
+        volumeMounts:
+        - name: data
+          mountPath: /log_store_data
+        - name: config
+          mountPath: /etc/log-store/config/
+        - name: license
+          mountPath: /etc/log-store/license/
+        command:
+        - /log-store 
+        - --config-file 
+        - /etc/log-store/config/config.toml
+        - --license-file
+        - /etc/log-store/license/license.txt
+        resources:
+          limits:
+            memory: 3G
+          requests:
+            memory: 2G
+      volumes:
+      - name: config
+        configMap:
+          name: log-store-config
+      - name: license
+        configMap:
+          name: log-store-license
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 100Gi

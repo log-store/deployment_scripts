@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: log-store
+spec:
+  selector:
+    app: log-store
+  ports:
+    - name: web
+      protocol: TCP
+      port: 8181
+      targetPort: 8181
+    - name: socket
+      protocol: TCP
+      port: 1234
+      targetPort: 1234
+    - name: syslog
+      protocol: TCP
+      port: 1601
+      targetPort: 1601

@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector
+data:
+  agent.yaml: |
+    data_dir: /vector-data-dir
+    api:
+      enabled: true
+      address: 127.0.0.1:8686
+      playground: false
+    sources:
+      kubernetes_logs:
+        type: kubernetes_logs
+      host_metrics:
+        filesystem:
+          devices:
+            excludes: [binfmt_misc]
+          filesystems:
+            excludes: [binfmt_misc]
+          mountPoints:
+            excludes: ["*/proc/sys/fs/binfmt_misc"]
+        type: host_metrics
+      internal_metrics:
+        type: internal_metrics
+    transforms:
+      add_t:
+        type: remap
+        inputs:
+          - kubernetes_logs
+        source: |2
+          ts = now()
+          .t = to_unix_timestamp(ts)
+
+          .pod_name = .kubernetes.pod_name
+    sinks:
+      prom_exporter:
+        type: prometheus_exporter
+        inputs: [host_metrics, internal_metrics]
+        address: 0.0.0.0:9090
+      log-store:
+        type: socket
+        inputs: [add_t]
+        address: log-store.logging.svc.cluster.local:1234
+        mode: tcp
+        encoding:
+          codec: json
